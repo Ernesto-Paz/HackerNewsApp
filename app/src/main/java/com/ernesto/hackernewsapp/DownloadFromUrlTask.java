@@ -14,7 +14,7 @@ import java.net.URL;
  * Created by Gatobro on 4/11/17.
  */
 
-public abstract class DownloadFromUrlTask<T extends Activity & DownloadHandler> extends AsyncTask<String, Void, String> {
+public abstract class DownloadFromUrlTask<T extends Activity> extends AsyncTask<String, Void, String> {
 
     T activity;
 
@@ -26,7 +26,6 @@ public abstract class DownloadFromUrlTask<T extends Activity & DownloadHandler> 
     protected String doInBackground(String... urls) {
         String result = "";
         HttpURLConnection http = null;
-        Log.i("Async","Fetching information.");
         try {
             URL url = new URL(urls[0]); // making a new URL
             http = (HttpURLConnection) url.openConnection(); //opening a connection using URL.

@@ -4,7 +4,7 @@ package com.ernesto.hackernewsapp;
  * Created by Gatobro on 4/11/17.
  */
 
-public interface DownloadHandler {
+public interface TopNewsIdsHandler {
 
-    void onDownloadTaskFinish(String data);
+    void HandleTopNewsIds(String data);
 }
