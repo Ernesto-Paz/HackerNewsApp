@@ -3,26 +3,40 @@ package com.ernesto.hackernewsapp;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler, ArticleFromIdHandler {
     DownloadTopNewsIds<MainActivity> getHackerTopNews;
-    JSONArray topNewsArray;
+    ListView mainActivityNewsRoll;
+    ArrayList<String> topNewsArray = new ArrayList<>(); //ArrayList of Article IDs
+    ArrayList<String> ArticleInfo = new ArrayList<>();
+    ArrayList<String> ArticleTitles = new ArrayList<>(); // ArrayList of Article Titles
+    ArrayList<HackerNewsArticle> ArticleArray = new ArrayList<>();
+    ArrayAdapter<String> adapter;
+    ArticleAdapter articleAdapter;
     int currentIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        mainActivityNewsRoll = (ListView) findViewById(R.id.mainactivitynewsroll);
+        articleAdapter = new ArticleAdapter(this, ArticleArray);
+        mainActivityNewsRoll.setAdapter(articleAdapter);
         getHackerTopNews = new DownloadTopNewsIds<>(this);
         getHackerTopNews.execute("https://hacker-news.firebaseio.com/v0/topstories.json");
-        setContentView(R.layout.activity_main);
+
         //get hackernews article info
         //parse news info
         //put info into a list and make an adapterview
-        //save info into sql database
+        //save info into sql database if user requests it.
         //SQLiteDatabase articleIds = new SQLiteDatabase();
     }
     public void getArticleInfo(int NumOfArticles){
@@ -30,21 +44,14 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
         int targetIndex = currentIndex + NumOfArticles;
         //Function will try to access up to targetIndex - 1 in the JSONArray.
         //Therefore if targetIndex is greater than the length of the array. It will reference a null index.
-        if( targetIndex > topNewsArray.length() ){
-            targetIndex = topNewsArray.length();
+        if( targetIndex > topNewsArray.size() ){
+            targetIndex = topNewsArray.size();
         }
 
         for(int i = currentIndex; i < targetIndex; i++){
-            try {
-                String ArticleCode = topNewsArray.getString(i);
+                String ArticleCode = topNewsArray.get(i);
                 new DownloadArticleFromId<>(this).execute("https://hacker-news.firebaseio.com/v0/item/" + ArticleCode + ".json");
                 Log.i("ArticleCode", ArticleCode);
-            }
-            catch(JSONException e){
-                //print JSON error. Print index that gave error.
-                e.printStackTrace();
-                Log.e("getArticleInfo", "JSON error getting index " + Integer.toString(i));
-            }
         }
 
         currentIndex = targetIndex;
@@ -56,7 +63,11 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
         Log.i("Info", data);
         try {
             //saves JSONArry to var so getArticleInfo() can access it late.
-            topNewsArray = new JSONArray(data);
+            JSONArray jsonArray = new JSONArray(data);
+            //load JSONArry data into an ArrayList
+            for(int i=0;i<jsonArray.length();i++){
+                topNewsArray.add (jsonArray.getString(i));
+            }
             getArticleInfo(20);
         }
         catch(JSONException e){
@@ -67,24 +78,13 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
 
     @Override
     public void HandleArticleFromId(String ArticleInfo){
-        /*{
-          "by" : "dhouston",
-          "descendants" : 71,
-          "id" : 8863,
-          "kids" : [ 8952, 9224, 8917, 8884, 8887, 8943, 8869, 8958, 9005, 9671, 8940, 9067, 8908, 9055, 8865, 8881, 8872, 8873, 8955, 10403, 8903, 8928, 9125, 8998, 8901, 8902, 8907, 8894, 8878, 8870, 8980, 8934, 8876 ],
-          "score" : 111,
-          "time" : 1175714200,
-          "title" : "My YC app: Dropbox - Throw away your USB drive",
-          "type" : "story",
-          "url" : "http://www.getdropbox.com/u/2/screencast.html"
-            }*/
         try{
             JSONObject Article = new JSONObject(ArticleInfo);
-            String ArticleUrl = Article.getString("url");
-            String ArticleTitle = Article.getString("title");
-            Log.i("Title", ArticleTitle);
-            Log.i("URL", ArticleUrl);
-
+            HackerNewsArticle newArticle = new HackerNewsArticle(Article);
+            if(newArticle.isValid == true) {
+                ArticleArray.add(newArticle);
+                articleAdapter.notifyDataSetChanged();
+            }
         }
         catch(JSONException e){
             Log.e("JSON ERROR", "Unable to parse: " + ArticleInfo);
