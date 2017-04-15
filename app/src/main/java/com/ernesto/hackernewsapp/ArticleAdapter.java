@@ -35,12 +35,14 @@ public class ArticleAdapter extends ArrayAdapter<HackerNewsArticle> {
         TextView articleTitle = (TextView) convertView.findViewById(R.id.ArticleTitle);
         TextView articleScore = (TextView) convertView.findViewById(R.id.ArticleScore);
         TextView articleDate = (TextView) convertView.findViewById(R.id.ArticlePostDate);
+        TextView articleNumber = (TextView) convertView.findViewById(R.id.ArticleNumber);
         //plug in information into the inflated view from your HackerNewsArticle object.
 
         articleTitle.setText(article.title);
         //String literals need to be changes to android resources for ease of translation.
         articleScore.setText("Score: " + Integer.toString(article.score));
         articleDate.setText("Date Posted: " + Integer.toString(article.time));
+        articleNumber.setText(Integer.toString(position + 1) + ".");
 
         return convertView;
     }

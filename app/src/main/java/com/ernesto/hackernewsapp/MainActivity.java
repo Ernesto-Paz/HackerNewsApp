@@ -3,6 +3,7 @@ package com.ernesto.hackernewsapp;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseArray;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -16,19 +17,22 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
     DownloadTopNewsIds<MainActivity> getHackerTopNews;
     ListView mainActivityNewsRoll;
     ArrayList<String> topNewsArray = new ArrayList<>(); //ArrayList of Article IDs
-    ArrayList<String> ArticleInfo = new ArrayList<>();
-    ArrayList<String> ArticleTitles = new ArrayList<>(); // ArrayList of Article Titles
-    ArrayList<HackerNewsArticle> ArticleArray = new ArrayList<>();
+    ArrayList<HackerNewsArticle> articleArray = new ArrayList<>(); //Array of Article Information attaches to ArticleAdapter.
+    SparseArray<HackerNewsArticle > articleSparseArray = new SparseArray<>(); //map which matches Articles to IDs
     ArrayAdapter<String> adapter;
     ArticleAdapter articleAdapter;
-    int currentIndex = 0;
+    int currentIndex;
+    int articlesPlaced;
+    int articleCounter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        currentIndex = 0;
+        articlesPlaced = 0;
         mainActivityNewsRoll = (ListView) findViewById(R.id.mainactivitynewsroll);
-        articleAdapter = new ArticleAdapter(this, ArticleArray);
+        articleAdapter = new ArticleAdapter(this, articleArray);
         mainActivityNewsRoll.setAdapter(articleAdapter);
         getHackerTopNews = new DownloadTopNewsIds<>(this);
         getHackerTopNews.execute("https://hacker-news.firebaseio.com/v0/topstories.json");
@@ -40,7 +44,12 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
         //SQLiteDatabase articleIds = new SQLiteDatabase();
     }
     public void getArticleInfo(int NumOfArticles){
-
+        if(articleCounter == 0) {
+            articleCounter = NumOfArticles;
+        }
+        else{
+            NumOfArticles = 0;
+        }
         int targetIndex = currentIndex + NumOfArticles;
         //Function will try to access up to targetIndex - 1 in the JSONArray.
         //Therefore if targetIndex is greater than the length of the array. It will reference a null index.
@@ -81,14 +90,35 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
         try{
             JSONObject Article = new JSONObject(ArticleInfo);
             HackerNewsArticle newArticle = new HackerNewsArticle(Article);
-            if(newArticle.isValid == true) {
-                ArticleArray.add(newArticle);
-                articleAdapter.notifyDataSetChanged();
+            if(newArticle.isValid) {
+                articleSparseArray.put(newArticle.id, newArticle);
+                articleCounter--;
+                if(articleCounter == 0 ) {
+                    updateArticleArray();
+                    articleAdapter.notifyDataSetChanged();
+                }
+
             }
         }
         catch(JSONException e){
             Log.e("JSON ERROR", "Unable to parse: " + ArticleInfo);
             e.printStackTrace();
+        }
+
+
+
+    }
+
+    public void updateArticleArray(){
+        //check each id in the Id array, inserting the article objects in order as it finds them.
+        //when the size fo the articlelist is equal to the size of the sparsearray then all articles have been found and listed properly.
+
+        while(articleSparseArray.size() > articleArray.size()){
+            int articleid = Integer.parseInt(topNewsArray.get(articlesPlaced));
+           HackerNewsArticle articletosort = articleSparseArray.get( articleid );
+            Log.i("Title", Integer.toString(articletosort.id) + " : " + articletosort.title);
+            articleAdapter.add(articletosort);
+            articlesPlaced++;
         }
 
 
