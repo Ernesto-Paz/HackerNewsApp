@@ -1,51 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:paddingTop="10dp"
     android:paddingStart="5dp"
     android:paddingEnd="5dp">
 
-    <TextView
-        android:id="@+id/ArticleTitle"
-        android:layout_width="350dp"
+    <RelativeLayout
+        android:id="@+id/relativeLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
-        android:text="Quite a long article title placeholder is here."
-        android:textAppearance="@android:style/TextAppearance.Material.Large"
-        android:textSize="18sp"
-        android:layout_marginBottom="10dp"
-        android:layout_toEndOf="@+id/ArticleNumber" />
+        android:layout_alignParentStart="true">
 
-    <TextView
-        android:id="@+id/ArticleScore"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Score: 1234"
-        android:textSize="14sp"
-        android:layout_below="@+id/ArticleTitle"
-        android:layout_alignParentStart="true" />
+        <TextView
+            android:id="@+id/ArticlePostDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Posted: 23-02-2017"
+            android:textAlignment="textEnd"
+            android:textSize="14sp"
+            android:layout_marginTop="5dp"
+            android:layout_alignBaseline="@+id/ArticleScore"
+            android:layout_alignBottom="@+id/ArticleScore"
+            android:layout_alignEnd="@+id/ArticleTitle" />
 
-    <TextView
-        android:id="@+id/ArticlePostDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Posted: 23-02-2017"
-        android:textAlignment="textEnd"
-        android:textSize="14sp"
-        android:layout_below="@+id/ArticleTitle"
-        android:layout_alignParentEnd="true" />
+        <TextView
+            android:id="@+id/ArticleTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="5dp"
+            android:layout_toEndOf="@+id/ArticleNumber"
+            android:layout_toStartOf="@+id/GoToArticleContentButton"
+            android:text="A Nice Long Title For Me So I Can See What Happens"
+            android:textAppearance="@android:style/TextAppearance.Material.Large"
+            android:textSize="18sp" />
 
-    <TextView
-        android:id="@+id/ArticleNumber"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginEnd="10dp"
-        android:text="10."
-        android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+        <TextView
+            android:id="@+id/ArticleScore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Score: 1234"
+            android:textSize="14sp"
+            android:layout_marginTop="5dp"
+            android:layout_below="@+id/ArticleTitle"
+            android:layout_toEndOf="@+id/ArticleNumber"
+            android:layout_toStartOf="@+id/ArticlePostDate"/>
+
+        <TextView
+            android:id="@+id/ArticleNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="5dp"
+            android:text="10."
+            android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+
+        <ImageButton
+            android:id="@+id/GoToArticleContentButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="40dp"
+            android:minHeight="40dp"
+            android:layout_alignParentEnd="true"
+            android:background="#00000000"
+            android:elevation="0dp"
+            android:rotation="180"
+            android:layout_centerVertical="true"
+            android:scaleType="centerCrop"
+            android:visibility="visible"
+            app:srcCompat="?attr/homeAsUpIndicator"/>
+    </RelativeLayout>
 
 </RelativeLayout>

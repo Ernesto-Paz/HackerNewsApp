@@ -29,7 +29,7 @@ public class HackerNewsArticle {
     HackerNewsArticle(JSONObject jsonObject){
         try {
             title = jsonObject.getString("title");
-            time = jsonObject.getLong("time");
+            time = jsonObject.getLong("time") * 1000; //converting Unix time in seconds to milliseconds for use with Java Calender class.
             url = jsonObject.optString("url", "");
             score = jsonObject.getInt("score");
             id = jsonObject.getInt("id");

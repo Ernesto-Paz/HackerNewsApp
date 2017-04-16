@@ -50,21 +50,19 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
             articlesLefttoGet = NumOfArticlestoGet;
         }
         else{
-
             NumOfArticlestoGet = 0;
-
         }
         int targetIndex = currentIndex + NumOfArticlestoGet;
         //Function will try to access up to targetIndex - 1 in the JSONArray.
         //Therefore if targetIndex is greater than the length of the array. It will reference a null index.
         if( targetIndex > topNewsArray.size() ){
             targetIndex = topNewsArray.size();
+            articlesLefttoGet = topNewsArray.size() - currentIndex;
         }
 
         for(int i = currentIndex; i < targetIndex; i++){
                 String ArticleCode = topNewsArray.get(i);
                 new DownloadArticleFromId<>(this).execute("https://hacker-news.firebaseio.com/v0/item/" + ArticleCode + ".json");
-                Log.i("ArticleCode", ArticleCode);
         }
 
         currentIndex = targetIndex;
@@ -73,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
 
     @Override
     public void HandleTopNewsIds(String data) {
-        Log.i("Info", data);
         try {
             //saves JSONArry to var so getArticleInfo() can access it late.
             JSONArray jsonArray = new JSONArray(data);
@@ -110,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
             }
         }
         catch(JSONException e){
+            articlesLefttoGet--;
             Log.e("JSON ERROR", "Unable to parse: " + ArticleInfo);
             e.printStackTrace();
         }
@@ -126,7 +124,6 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
             int articleid = Integer.parseInt(topNewsArray.get(articlesPlaced));
            HackerNewsArticle articletosort = articleSparseArray.get( articleid );
             if(articletosort != null) {
-                Log.i("Title", Integer.toString(articletosort.id) + " : " + articletosort.title);
                 articleAdapter.add(articletosort);
                 articlesPlaced++;
             }

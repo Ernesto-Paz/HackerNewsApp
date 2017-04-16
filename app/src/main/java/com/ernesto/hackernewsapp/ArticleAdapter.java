@@ -8,10 +8,10 @@ import android.widget.ArrayAdapter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import android.util.Log;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 /**
@@ -28,12 +28,14 @@ private static class ViewRecycler {
     TextView articleScore;
     TextView articleDate;
     TextView articleNumber;
+    ImageButton articleGoToContentButton;
 
-    public ViewRecycler(TextView articleTitle, TextView articleScore, TextView articleDate, TextView articleNumber) {
+    public ViewRecycler(TextView articleTitle, TextView articleScore, TextView articleDate, TextView articleNumber, ImageButton articleGoToContentButton) {
         this.articleTitle = articleTitle;
         this.articleScore = articleScore;
         this.articleDate = articleDate;
         this.articleNumber = articleNumber;
+        this.articleGoToContentButton = articleGoToContentButton;
     }
 }
 
@@ -45,6 +47,12 @@ private static class ViewRecycler {
     @Override @NonNull
     public View getView(int position, View convertView, ViewGroup parent){
         HackerNewsArticle article = getItem(position); //get Object to covert into a view.
+        if(position >(getCount() - 15)){
+            MainActivity activity = (MainActivity) getContext();
+            if(activity.articlesLefttoGet == 0) {
+                activity.getArticleInfo(1);
+            }
+        }
         //check  if if view is being recycled
         ViewRecycler viewRecycler;
         if(convertView == null) {
@@ -54,7 +62,8 @@ private static class ViewRecycler {
             TextView articleScore = (TextView) convertView.findViewById(R.id.ArticleScore);
             TextView articleDate = (TextView) convertView.findViewById(R.id.ArticlePostDate);
             TextView articleNumber = (TextView) convertView.findViewById(R.id.ArticleNumber);
-            viewRecycler = new ViewRecycler(articleTitle, articleScore, articleDate, articleNumber);
+            ImageButton articleGoToContentButton = (ImageButton) convertView.findViewById(R.id.GoToArticleContentButton);
+            viewRecycler = new ViewRecycler(articleTitle, articleScore, articleDate, articleNumber, articleGoToContentButton);
             convertView.setTag(viewRecycler);
         }
         else{
@@ -62,9 +71,7 @@ private static class ViewRecycler {
         }
         //plug in information into the inflated view from your HackerNewsArticle object.
 
-        Log.i("Time", Long.toString(article.time * 1000));
-        myCalendar.setTimeInMillis(article.time * 1000);//setting the date.
-        Log.i("Calendar Time", Long.toString(myCalendar.getTimeInMillis()));
+        myCalendar.setTimeInMillis(article.time);//setting the date.
         String date = "Posted On: " + simpleDateFormat.format(myCalendar.getTime());
         viewRecycler.articleTitle.setText(article.title);
         //String literals need to be changes to android resources for ease of translation.
