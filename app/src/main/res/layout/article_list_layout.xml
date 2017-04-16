@@ -34,7 +34,8 @@
             android:layout_marginTop="5dp"
             android:layout_toEndOf="@+id/ArticleNumber"
             android:layout_toStartOf="@+id/GoToArticleContentButton"
-            android:text="A Nice Long Title For Me So I Can See What Happens"
+            android:minHeight="40dp"
+            android:text=" A two line Title A two line Title A two line Title"
             android:textAppearance="@android:style/TextAppearance.Material.Large"
             android:textSize="18sp" />
 

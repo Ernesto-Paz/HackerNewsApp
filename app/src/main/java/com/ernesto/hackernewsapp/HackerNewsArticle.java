@@ -3,6 +3,7 @@ package com.ernesto.hackernewsapp;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
 /**
  * Created by Gatobro on 4/14/17.
  */

@@ -8,11 +8,13 @@ import android.widget.ArrayAdapter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.content.Intent;
 
 /**
  * Created by Gatobro on 4/14/17.
@@ -41,9 +43,45 @@ private static class ViewRecycler {
 
     public ArticleAdapter(Context context, ArrayList<HackerNewsArticle> articles){
         super(context, R.layout.article_list_layout, articles);
-        myCalendar = Calendar.getInstance();
+        TimeZone zone = TimeZone.getTimeZone("etc/UTC");
+        myCalendar = Calendar.getInstance(zone);
         myInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
+
+    private String getTimeDifference(long articletime){
+        long currentTime = myCalendar.getTimeInMillis();
+        String date = "Posted ";
+        long timeDifference = (currentTime - articletime)/1000; //difference in seconds.
+        if(timeDifference < 60){
+            date = date + Long.toString(timeDifference) + " seconds ago.";
+            return date;
+        }
+        timeDifference /= 60; //difference in minutes;
+        if(timeDifference < 60){
+            date = date + Long.toString(timeDifference) + " minutes ago.";
+            return date;
+        }
+        timeDifference /= 60; //difference in hours;
+        if(timeDifference < 24){
+            date = date + Long.toString(timeDifference) + " hours ago.";
+            return date;
+        }
+        timeDifference /= 24; //difference in days;
+        if(timeDifference < 30){
+            date = date + Long.toString(timeDifference) + " days ago.";
+            return date;
+        }
+        timeDifference /= 30; //difference in months;
+        if(timeDifference < 12){
+            date = date + Long.toString(timeDifference) + " months ago.";
+            return date;
+        }
+        timeDifference /= 12; //difference in years;
+        date = date + Long.toString(timeDifference) + " years ago.";
+        return date;
+    }
+
+
     @Override @NonNull
     public View getView(int position, View convertView, ViewGroup parent){
         HackerNewsArticle article = getItem(position); //get Object to covert into a view.
@@ -69,10 +107,19 @@ private static class ViewRecycler {
         else{
             viewRecycler = (ViewRecycler) convertView.getTag();
         }
-        //plug in information into the inflated view from your HackerNewsArticle object.
+        viewRecycler.articleGoToContentButton.setTag(article);
+        viewRecycler.articleGoToContentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                HackerNewsArticle article = (HackerNewsArticle) v.getTag();//have url.
+                Intent i = new Intent(getContext().getApplicationContext(), ArticleActivity.class);
+                i.putExtra("url", article.url);
+                getContext().startActivity(i);
+            }
+        });
 
-        myCalendar.setTimeInMillis(article.time);//setting the date.
-        String date = "Posted On: " + simpleDateFormat.format(myCalendar.getTime());
+        //plug in information into the inflated view from your HackerNewsArticle object.
+        String date = getTimeDifference(article.time);
         viewRecycler.articleTitle.setText(article.title);
         //String literals need to be changes to android resources for ease of translation.
         viewRecycler.articleScore.setText("Score: " + Integer.toString(article.score));
