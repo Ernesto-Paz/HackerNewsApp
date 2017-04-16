@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
     ArticleAdapter articleAdapter;
     int currentIndex;
     int articlesPlaced;
-    int articleCounter = 0;
+    int articlesLefttoGet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
         setContentView(R.layout.activity_main);
         currentIndex = 0;
         articlesPlaced = 0;
+        articlesLefttoGet = 0;
         mainActivityNewsRoll = (ListView) findViewById(R.id.mainactivitynewsroll);
         articleAdapter = new ArticleAdapter(this, articleArray);
         mainActivityNewsRoll.setAdapter(articleAdapter);
@@ -43,14 +44,17 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
         //save info into sql database if user requests it.
         //SQLiteDatabase articleIds = new SQLiteDatabase();
     }
-    public void getArticleInfo(int NumOfArticles){
-        if(articleCounter == 0) {
-            articleCounter = NumOfArticles;
+    public void getArticleInfo(int NumOfArticlestoGet){
+        //if the queue is empty, add more articles to the queue. Else, ignore additional requests.
+        if(articlesLefttoGet == 0) {
+            articlesLefttoGet = NumOfArticlestoGet;
         }
         else{
-            NumOfArticles = 0;
+
+            NumOfArticlestoGet = 0;
+
         }
-        int targetIndex = currentIndex + NumOfArticles;
+        int targetIndex = currentIndex + NumOfArticlestoGet;
         //Function will try to access up to targetIndex - 1 in the JSONArray.
         //Therefore if targetIndex is greater than the length of the array. It will reference a null index.
         if( targetIndex > topNewsArray.size() ){
@@ -77,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
             for(int i=0;i<jsonArray.length();i++){
                 topNewsArray.add (jsonArray.getString(i));
             }
-            getArticleInfo(20);
+            getArticleInfo(30);
         }
         catch(JSONException e){
             e.printStackTrace();
@@ -91,12 +95,17 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
             JSONObject Article = new JSONObject(ArticleInfo);
             HackerNewsArticle newArticle = new HackerNewsArticle(Article);
             if(newArticle.isValid) {
+                articlesLefttoGet--;
                 articleSparseArray.put(newArticle.id, newArticle);
-                articleCounter--;
-                if(articleCounter == 0 ) {
+                if(articlesLefttoGet == 0 ) {
                     updateArticleArray();
                     articleAdapter.notifyDataSetChanged();
                 }
+
+            }
+            else{
+                articlesLefttoGet--;
+
 
             }
         }
@@ -116,9 +125,15 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
         while(articleSparseArray.size() > articleArray.size()){
             int articleid = Integer.parseInt(topNewsArray.get(articlesPlaced));
            HackerNewsArticle articletosort = articleSparseArray.get( articleid );
-            Log.i("Title", Integer.toString(articletosort.id) + " : " + articletosort.title);
-            articleAdapter.add(articletosort);
-            articlesPlaced++;
+            if(articletosort != null) {
+                Log.i("Title", Integer.toString(articletosort.id) + " : " + articletosort.title);
+                articleAdapter.add(articletosort);
+                articlesPlaced++;
+            }
+            else{
+                articlesPlaced++;
+
+            }
         }
 
 

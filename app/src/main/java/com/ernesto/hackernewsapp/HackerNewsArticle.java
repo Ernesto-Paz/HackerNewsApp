@@ -22,15 +22,15 @@ import org.json.JSONObject;
 public class HackerNewsArticle {
     boolean isValid = true;
     String title;
-    int time;
+    long time;
     String url;
     int score;
     int id;
     HackerNewsArticle(JSONObject jsonObject){
         try {
             title = jsonObject.getString("title");
-            time = jsonObject.getInt("time");
-            url = jsonObject.getString("url");
+            time = jsonObject.getLong("time");
+            url = jsonObject.optString("url", "");
             score = jsonObject.getInt("score");
             id = jsonObject.getInt("id");
 
