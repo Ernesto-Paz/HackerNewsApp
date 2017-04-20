@@ -87,7 +87,7 @@ private static class ViewRecycler {
         HackerNewsArticle article = getItem(position); //get Object to covert into a view.
         if(position >(getCount() - 15)){
             MainActivity activity = (MainActivity) getContext();
-            if(activity.articlesLefttoGet == 0) {
+            if(activity.articlesLeftToGet == 0) {
                 activity.getArticleInfo(1);
             }
         }
@@ -108,16 +108,17 @@ private static class ViewRecycler {
             viewRecycler = (ViewRecycler) convertView.getTag();
         }
         viewRecycler.articleGoToContentButton.setTag(article);
-        viewRecycler.articleGoToContentButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                HackerNewsArticle article = (HackerNewsArticle) v.getTag();//have url.
-                Intent i = new Intent(getContext().getApplicationContext(), ArticleActivity.class);
-                i.putExtra("url", article.url);
-                getContext().startActivity(i);
-            }
-        });
-
+        if(article.url != "") {
+            viewRecycler.articleGoToContentButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    HackerNewsArticle article = (HackerNewsArticle) v.getTag();//have url.
+                    Intent i = new Intent(getContext().getApplicationContext(), ArticleActivity.class);
+                    i.putExtra("url", article.url);
+                    getContext().startActivity(i);
+                }
+            });
+        }
         //plug in information into the inflated view from your HackerNewsArticle object.
         String date = getTimeDifference(article.time);
         viewRecycler.articleTitle.setText(article.title);

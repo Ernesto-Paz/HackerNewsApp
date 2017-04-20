@@ -2,10 +2,14 @@ package com.ernesto.hackernewsapp;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.view.Menu;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,15 +27,17 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
     ArticleAdapter articleAdapter;
     int currentIndex;
     int articlesPlaced;
-    int articlesLefttoGet;
+    int articlesLeftToGet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.MainActivityToolbar);
+        setSupportActionBar(myToolbar);
         currentIndex = 0;
         articlesPlaced = 0;
-        articlesLefttoGet = 0;
+        articlesLeftToGet = 0;
         mainActivityNewsRoll = (ListView) findViewById(R.id.mainactivitynewsroll);
         articleAdapter = new ArticleAdapter(this, articleArray);
         mainActivityNewsRoll.setAdapter(articleAdapter);
@@ -44,10 +50,41 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
         //save info into sql database if user requests it.
         //SQLiteDatabase articleIds = new SQLiteDatabase();
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.refresh, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch(item.getItemId()) {
+
+            case (R.id.action_refresh):
+                Log.i("Refresh Button", "Refresh...");
+                currentIndex = 0;
+                articlesPlaced = 0;
+                articlesLeftToGet = 0;
+                articleAdapter.clear();
+                DownloadArticleFromId.cancelAllTasks();
+                getHackerTopNews = new DownloadTopNewsIds<>(this);
+                getHackerTopNews.execute("https://hacker-news.firebaseio.com/v0/topstories.json");
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+
+    }
+
     public void getArticleInfo(int NumOfArticlestoGet){
         //if the queue is empty, add more articles to the queue. Else, ignore additional requests.
-        if(articlesLefttoGet == 0) {
-            articlesLefttoGet = NumOfArticlestoGet;
+        Log.i("Getting Info", "Test");
+        if(articlesLeftToGet == 0) {
+            articlesLeftToGet = NumOfArticlestoGet;
         }
         else{
             NumOfArticlestoGet = 0;
@@ -57,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
         //Therefore if targetIndex is greater than the length of the array. It will reference a null index.
         if( targetIndex > topNewsArray.size() ){
             targetIndex = topNewsArray.size();
-            articlesLefttoGet = topNewsArray.size() - currentIndex;
+            articlesLeftToGet = topNewsArray.size() - currentIndex;
         }
 
         for(int i = currentIndex; i < targetIndex; i++){
@@ -92,22 +129,21 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
             JSONObject Article = new JSONObject(ArticleInfo);
             HackerNewsArticle newArticle = new HackerNewsArticle(Article);
             if(newArticle.isValid) {
-                articlesLefttoGet--;
+                articlesLeftToGet--;
                 articleSparseArray.put(newArticle.id, newArticle);
-                if(articlesLefttoGet == 0 ) {
+                if(articlesLeftToGet == 0 ) {
                     updateArticleArray();
-                    articleAdapter.notifyDataSetChanged();
                 }
 
             }
             else{
-                articlesLefttoGet--;
+                articlesLeftToGet--;
 
 
             }
         }
         catch(JSONException e){
-            articlesLefttoGet--;
+            articlesLeftToGet--;
             Log.e("JSON ERROR", "Unable to parse: " + ArticleInfo);
             e.printStackTrace();
         }
