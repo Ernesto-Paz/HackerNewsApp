@@ -2,6 +2,8 @@ package com.ernesto.hackernewsapp;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.SparseArray;
@@ -25,6 +27,9 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
     SparseArray<HackerNewsArticle > articleSparseArray = new SparseArray<>(); //map which matches Articles to IDs
     ArrayAdapter<String> adapter;
     ArticleAdapter articleAdapter;
+    RecyclerView recyclerView;
+    RecyclerView.Adapter recyclerViewAdapter;
+    RecyclerView.LayoutManager layoutManager;
     int currentIndex;
     int articlesPlaced;
     int articlesLeftToGet;
@@ -38,9 +43,14 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
         currentIndex = 0;
         articlesPlaced = 0;
         articlesLeftToGet = 0;
-        mainActivityNewsRoll = (ListView) findViewById(R.id.mainactivitynewsroll);
-        articleAdapter = new ArticleAdapter(this, articleArray);
-        mainActivityNewsRoll.setAdapter(articleAdapter);
+        //mainActivityNewsRoll = (ListView) findViewById(R.id.mainactivitynewsroll);
+        //articleAdapter = new ArticleAdapter(this, articleArray);
+        //ainActivityNewsRoll.setAdapter(articleAdapter);
+        recyclerView = (RecyclerView) findViewById(R.id.articleRecycler);
+        layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerViewAdapter = new ArticleAdapterRecycler<>(articleArray, this);
+        recyclerView.setAdapter(recyclerViewAdapter);
         getHackerTopNews = new DownloadTopNewsIds<>(this);
         getHackerTopNews.execute("https://hacker-news.firebaseio.com/v0/topstories.json");
 
@@ -68,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
                 currentIndex = 0;
                 articlesPlaced = 0;
                 articlesLeftToGet = 0;
-                articleAdapter.clear();
+                articleArray.clear();
                 DownloadArticleFromId.cancelAllTasks();
                 getHackerTopNews = new DownloadTopNewsIds<>(this);
                 getHackerTopNews.execute("https://hacker-news.firebaseio.com/v0/topstories.json");
@@ -160,7 +170,8 @@ public class MainActivity extends AppCompatActivity implements TopNewsIdsHandler
             int articleid = Integer.parseInt(topNewsArray.get(articlesPlaced));
            HackerNewsArticle articletosort = articleSparseArray.get( articleid );
             if(articletosort != null) {
-                articleAdapter.add(articletosort);
+                articleArray.add(articletosort);
+                recyclerViewAdapter.notifyDataSetChanged();
                 articlesPlaced++;
             }
             else{
